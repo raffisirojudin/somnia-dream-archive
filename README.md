@@ -1,10 +1,10 @@
 # Somnia — A Dream Archive
 
-An immersive, scroll-driven 3D website that simulates walking through someone's archive of dreams. Each "fragment" is a fully realized 3D scene — floating crystals, melting clocks, an infinite mirror corridor, and blooming flowers — woven together with cinematic scroll transitions, ambient procedural audio, and a custom cursor experience.
+An immersive, scroll-driven 3D website that simulates walking through someone's archive of dreams. Each "fragment" is a fully realized 3D scene — floating crystals, melting clocks, a whispering garden of lanterns, an infinite mirror corridor, a static-filled television, and blooming flowers — woven together with cinematic scroll transitions, ambient procedural audio, and a custom cursor experience.
 
 ## Inspiration
 
-The idea came from the feeling of half-remembering a dream right after waking up — fragmented, beautiful, slightly uncanny. Rather than building a single 3D scene, Somnia is structured as four distinct "rooms," each representing a different sensation dreams can carry: suspension (crystals), distortion (clocks), self-reflection (mirrors), and renewal (bloom).
+The idea came from the feeling of half-remembering a dream right after waking up — fragmented, beautiful, slightly uncanny. Rather than building a single 3D scene, Somnia is structured as six distinct "rooms," each representing a different sensation dreams can carry: suspension (crystals), distortion (clocks), connection (garden), self-reflection (mirrors), borrowed memory (television), and renewal (bloom).
 
 ## Technologies & Tools Used
 
@@ -19,12 +19,13 @@ No frameworks, no build step — a single self-contained HTML file.
 ## Features
 
 - Custom animated loading screen
-- Four distinct 3D "dream rooms," each with independent Three.js scenes and lighting
+- Six distinct 3D "dream rooms," each with independent Three.js scenes and lighting
+- **Interactive elements in every room**: click crystals to shatter and reform them, drag clock faces to spin their hands manually, click glowing lanterns in the whispering garden to wake them with a light pulse and firefly burst, hover in the mirror corridor to draw the watching figure closer, click an old television's buttons to flip through procedurally generated "channels" (each rendered live via Canvas2D and mapped as a Three.js texture), click flowers to trigger an instant bloom with a pollen particle burst
 - Procedurally generated ambient audio (toggleable, zero external audio assets)
 - Mouse-reactive parallax on typography and camera movement
 - Scroll-triggered reveal choreography (GSAP ScrollTrigger)
 - Hidden "Deep Dream" mode (click the logo)
-- Fully responsive (mobile breakpoints included)
+- Fully responsive (mobile breakpoints included, touch support for drag/click interactions)
 
 ## Running locally
 
