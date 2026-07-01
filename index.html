@@ -10,32 +10,44 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--void:#04040b;--mist:#c8c0e0;--pearl:#f0eaf8;--lavender:#a89ec8}
+:root{
+  --void:#04040b;--mist:#c8c0e0;--pearl:#f0eaf8;--lavender:#a89ec8;
+  --amb-r:4;--amb-g:4;--amb-b:11; /* ambient color controlled by JS */
+}
 html{scroll-behavior:smooth}
 body{background:var(--void);color:var(--pearl);font-family:'Cormorant Garamond',Georgia,serif;overflow-x:hidden;cursor:none}
+
+/* ambient bg overlay that shifts per section */
+#amb{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:1;transition:background 1.6s ease}
 
 #cur{position:fixed;width:8px;height:8px;background:var(--pearl);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference;transition:width .25s,height .25s}
 #cur-ring{position:fixed;width:38px;height:38px;border:1px solid rgba(168,158,200,.35);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s}
 
 #loader{position:fixed;inset:0;z-index:99999;background:var(--void);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;transition:opacity 1.4s ease}
 #loader.fade{opacity:0;pointer-events:none}
-.ld-t{font-size:clamp(3rem,10vw,7rem);font-style:italic;font-weight:300;color:var(--pearl);opacity:0;letter-spacing:-.02em}
+.ld-t{font-size:clamp(3rem,10vw,7rem);font-style:italic;font-weight:300;color:var(--pearl);opacity:0;letter-spacing:.3em}
 .ld-bar-w{width:min(260px,55vw);height:1px;background:rgba(168,158,200,.12);overflow:hidden}
 .ld-bar{height:100%;width:0%;background:linear-gradient(90deg,transparent,var(--lavender),transparent);transition:width .08s linear}
 .ld-txt{font-family:'Raleway',sans-serif;font-size:.58rem;letter-spacing:.4em;text-transform:uppercase;color:var(--lavender);opacity:0}
 
-#vig{position:fixed;inset:0;z-index:1;background:radial-gradient(ellipse at center,transparent 35%,rgba(4,4,11,.72) 100%);pointer-events:none}
+/* vignette — reacts to section via JS class changes */
+#vig{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 30%,rgba(4,4,11,.82) 100%);
+  transition:opacity 1.2s ease}
 #bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
 
-nav{position:fixed;top:0;left:0;right:0;z-index:20;padding:1.8rem 2.5rem;display:flex;justify-content:space-between;align-items:center;opacity:0}
-.nav-logo{font-size:1rem;font-style:italic;font-weight:300;color:var(--pearl);letter-spacing:.05em;cursor:none;user-select:none}
-.nav-links{display:flex;gap:2.5rem;list-style:none}
-.nl-btn{background:none;border:none;font-family:'Raleway',sans-serif;font-size:.58rem;letter-spacing:.35em;text-transform:uppercase;color:var(--lavender);cursor:none;padding:0;transition:color .3s}
-.nl-btn:hover{color:var(--pearl)}
+nav{position:fixed;top:0;left:0;right:0;z-index:20;padding:1.8rem 2.5rem;display:flex;justify-content:space-between;align-items:center;opacity:0;
+  background:linear-gradient(to bottom,rgba(4,4,11,.55) 0%,transparent 100%);
+  backdrop-filter:blur(2px)}
+.nav-logo{font-size:1rem;font-style:italic;font-weight:300;color:var(--pearl);letter-spacing:.05em;cursor:none;user-select:none;transition:letter-spacing .8s ease}
+.nav-logo:hover{letter-spacing:.2em}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nl-btn{background:none;border:none;font-family:'Raleway',sans-serif;font-size:.55rem;letter-spacing:.35em;text-transform:uppercase;color:var(--lavender);cursor:none;padding:0;transition:color .3s,letter-spacing .4s}
+.nl-btn:hover{color:var(--pearl);letter-spacing:.45em}
 
 #prog{position:fixed;right:2rem;top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:.7rem;opacity:0}
-.pdot{width:4px;height:4px;border-radius:50%;background:rgba(168,158,200,.25);cursor:none;transition:background .4s,transform .4s}
-.pdot.on{background:var(--lavender);transform:scale(1.7)}
+.pdot{width:4px;height:4px;border-radius:50%;background:rgba(168,158,200,.25);cursor:none;transition:background .4s,transform .4s,box-shadow .4s}
+.pdot.on{background:var(--lavender);transform:scale(1.7);box-shadow:0 0 8px rgba(168,158,200,.5)}
 
 #abtn{position:fixed;bottom:2rem;left:2rem;z-index:20;background:none;border:1px solid rgba(168,158,200,.2);color:var(--lavender);font-family:'Raleway',sans-serif;font-size:.58rem;letter-spacing:.35em;text-transform:uppercase;padding:.65rem 1.2rem;cursor:none;display:flex;align-items:center;gap:.6rem;opacity:0;transition:border-color .4s,color .4s,background .4s}
 #abtn:hover{border-color:rgba(168,158,200,.5);color:var(--pearl);background:rgba(168,158,200,.04)}
@@ -53,44 +65,101 @@ nav{position:fixed;top:0;left:0;right:0;z-index:20;padding:1.8rem 2.5rem;display
 
 .section{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:5rem 2rem;text-align:center}
 
+/* ── INTRO ── */
 .eyebrow{font-family:'Raleway',sans-serif;font-weight:200;font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--lavender);opacity:0;margin-bottom:2rem}
-.intro-title{font-size:clamp(5rem,16vw,11rem);font-weight:300;font-style:italic;line-height:.9;letter-spacing:-.02em;color:var(--pearl);opacity:0;margin-bottom:1.5rem}
+.intro-title{
+  font-size:clamp(5rem,16vw,11rem);font-weight:300;font-style:italic;
+  line-height:.9;letter-spacing:.15em;color:var(--pearl);
+  opacity:0;margin-bottom:1.5rem;
+  text-shadow:0 0 80px rgba(168,158,200,0);
+  transition:text-shadow 1.2s ease
+}
+.intro-title.lit{text-shadow:0 0 80px rgba(168,158,200,.18)}
 .intro-sub{font-size:clamp(.85rem,1.8vw,1.05rem);font-weight:300;color:var(--mist);opacity:0;max-width:420px;line-height:1.85;margin:0 auto 3.5rem}
 .scroll-cue{opacity:0;display:flex;flex-direction:column;align-items:center;gap:.6rem}
 .scroll-cue span{font-family:'Raleway',sans-serif;font-size:.62rem;letter-spacing:.35em;text-transform:uppercase;color:var(--lavender)}
 .scroll-line{width:1px;height:60px;background:linear-gradient(to bottom,var(--lavender),transparent);animation:sp 2s ease-in-out infinite}
 @keyframes sp{0%,100%{opacity:.3;transform:scaleY(.6) translateY(-8px)}50%{opacity:1;transform:scaleY(1) translateY(0)}}
 
-.divr{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;padding:.8rem 2rem;gap:1.5rem}
-.dline{flex:1;max-width:180px;height:1px;transform-origin:left}
-.dline.l{background:linear-gradient(to right,transparent,rgba(168,158,200,.25))}
-.dline.r{background:linear-gradient(to left,transparent,rgba(168,158,200,.25));transform-origin:right}
-.dglyph{font-size:.5rem;color:var(--lavender);letter-spacing:.3em;opacity:.6}
+/* ── DRAMATIC DIVIDER ── */
+.divr{
+  position:relative;z-index:2;
+  display:flex;align-items:center;justify-content:center;
+  padding:1.6rem 2rem;gap:1.5rem;
+  overflow:hidden
+}
+.dline{flex:1;max-width:200px;height:1px;transform-origin:left;position:relative}
+.dline.l{background:linear-gradient(to right,transparent,rgba(168,158,200,.35));transform-origin:right}
+.dline.r{background:linear-gradient(to left,transparent,rgba(168,158,200,.35));transform-origin:left}
+/* glow flare travelling along the line on reveal */
+.dline::after{
+  content:'';position:absolute;top:0;left:-20%;
+  width:20%;height:100%;
+  background:linear-gradient(to right,transparent,rgba(168,158,200,.9),transparent);
+  opacity:0
+}
+.divr.fired .dline.l::after{animation:flareL .8s .3s ease-out forwards}
+.divr.fired .dline.r::after{animation:flareR .8s .3s ease-out forwards}
+@keyframes flareL{0%{left:-20%;opacity:1}100%{left:110%;opacity:0}}
+@keyframes flareR{0%{right:-20%;left:auto;opacity:1}100%{right:110%;left:auto;opacity:0}}
+.dglyph{
+  font-size:.55rem;color:var(--lavender);letter-spacing:.3em;
+  opacity:0;transform:scale(.3);
+  transition:opacity .5s,transform .5s;
+  position:relative
+}
+.dglyph::before{
+  content:'';position:absolute;inset:-8px;border-radius:50%;
+  background:radial-gradient(circle,rgba(168,158,200,.2) 0%,transparent 70%);
+  opacity:0;transform:scale(0);transition:opacity .6s,transform .6s
+}
+.divr.fired .dglyph{opacity:.8;transform:scale(1)}
+.divr.fired .dglyph::before{opacity:1;transform:scale(1)}
 
+/* ── ROOM ELEMENTS ── */
 .room-label{font-family:'Raleway',sans-serif;font-size:.58rem;letter-spacing:.5em;text-transform:uppercase;color:var(--lavender);margin-bottom:1.2rem;opacity:0}
-.room-title{font-size:clamp(2.2rem,7vw,5.5rem);font-weight:300;font-style:italic;line-height:1.05;margin-bottom:1.5rem;opacity:0}
+.room-title{
+  font-size:clamp(2.2rem,7vw,5.5rem);font-weight:300;font-style:italic;
+  line-height:1.05;margin-bottom:1.5rem;opacity:0;
+  letter-spacing:-.01em
+}
 .room-body{font-size:clamp(.88rem,1.7vw,1rem);font-weight:300;line-height:1.95;max-width:460px;color:var(--mist);opacity:0}
-.room-hint{font-family:'Raleway',sans-serif;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(168,158,200,.55);margin-top:1.3rem;opacity:0;display:flex;align-items:center;gap:.5rem;justify-content:center}
+.room-hint{
+  font-family:'Raleway',sans-serif;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(168,158,200,.55);margin-top:1.3rem;opacity:0;
+  display:flex;align-items:center;gap:.5rem;justify-content:center
+}
 .room-hint::before{content:'';width:5px;height:5px;border-radius:50%;background:rgba(168,158,200,.6);animation:hintPulse 1.8s ease-in-out infinite}
 @keyframes hintPulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}
 
-.rcanvas-wrap{position:relative;width:min(600px,94vw);height:min(440px,62vw);margin:2.5rem auto;opacity:0}
+/* canvas frame — corner glow on hover */
+.rcanvas-wrap{position:relative;width:min(600px,94vw);height:min(440px,62vw);margin:2.5rem auto;opacity:0;transition:box-shadow .6s ease}
+.rcanvas-wrap:hover{box-shadow:0 0 60px rgba(168,158,200,.06)}
 .rcanvas-wrap canvas{width:100%!important;height:100%!important}
-.rframe{position:absolute;inset:-1px;border:1px solid rgba(168,158,200,.12);pointer-events:none}
-.rframe::before,.rframe::after{content:'';position:absolute;width:14px;height:14px;border-color:rgba(168,158,200,.45);border-style:solid}
+.rframe{position:absolute;inset:-1px;border:1px solid rgba(168,158,200,.12);pointer-events:none;transition:border-color .6s}
+.rcanvas-wrap:hover .rframe{border-color:rgba(168,158,200,.28)}
+.rframe::before,.rframe::after{content:'';position:absolute;width:14px;height:14px;border-color:rgba(168,158,200,.45);border-style:solid;transition:border-color .6s}
+.rcanvas-wrap:hover .rframe::before,.rcanvas-wrap:hover .rframe::after{border-color:rgba(168,158,200,.9)}
 .rframe::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
 .rframe::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
 
-.rc .room-title{color:#b8d4f4}.rk .room-title{color:#d4c49a}.rg .room-title{color:#b8d4a0}.rv .room-title{color:#a8c8d4}.rm .room-title{color:#c8c0e0}.rb .room-title{color:#d4a8b8}
+/* room title tints */
+.rc .room-title{color:#b8d4f4}.rk .room-title{color:#d4c49a}.rg .room-title{color:#b8d4a0}
+.rv .room-title{color:#a8c8d4}.rm .room-title{color:#c8c0e0}.rb .room-title{color:#d4a8b8}
 
+/* ── OUTRO ── */
 #outro{padding:8rem 2rem}
 .out-label{font-family:'Raleway',sans-serif;font-size:.58rem;letter-spacing:.5em;text-transform:uppercase;color:var(--lavender);margin-bottom:2rem;opacity:0}
 .out-title{font-size:clamp(2.5rem,8vw,6rem);font-weight:300;font-style:italic;color:var(--pearl);margin-bottom:1.5rem;opacity:0;line-height:1.05}
 .out-sub{font-size:.95rem;font-weight:300;color:var(--mist);max-width:360px;margin:0 auto 3rem;line-height:1.9;opacity:0}
-.out-btn{display:inline-block;font-family:'Raleway',sans-serif;font-size:.68rem;letter-spacing:.4em;text-transform:uppercase;color:var(--lavender);border:1px solid rgba(168,158,200,.28);padding:.85rem 2.5rem;opacity:0;cursor:none;background:none;transition:border-color .4s,color .4s,background .4s}
-.out-btn:hover{border-color:rgba(168,158,200,.65);color:var(--pearl);background:rgba(168,158,200,.04)}
+.out-btn{display:inline-block;font-family:'Raleway',sans-serif;font-size:.68rem;letter-spacing:.4em;text-transform:uppercase;color:var(--lavender);border:1px solid rgba(168,158,200,.28);padding:.85rem 2.5rem;opacity:0;cursor:none;background:none;transition:border-color .4s,color .4s,background .4s,letter-spacing .5s}
+.out-btn:hover{border-color:rgba(168,158,200,.65);color:var(--pearl);background:rgba(168,158,200,.04);letter-spacing:.55em}
 .snum{position:absolute;bottom:2.2rem;right:2.5rem;font-family:'Raleway',sans-serif;font-size:.52rem;letter-spacing:.28em;color:rgba(168,158,200,.3)}
 
+/* ── SECTION TRANSITION OVERLAY (flash on section enter) ── */
+#flash{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;background:rgba(168,158,200,.04)}
+
+/* deep dream */
 body.dd #bg{filter:hue-rotate(55deg) saturate(1.9);transition:filter 1.2s ease}
 @keyframes dpulse{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 40px rgba(160,100,255,.35)}}
 body.dd .intro-title,body.dd .room-title{animation:dpulse 3.5s ease-in-out infinite}
@@ -107,7 +176,9 @@ body.dd .intro-title,body.dd .room-title{animation:dpulse 3.5s ease-in-out infin
 </div>
 
 <div id="cur"></div><div id="cur-ring"></div>
+<div id="amb"></div>
 <div id="vig"></div>
+<div id="flash"></div>
 <canvas id="bg"></canvas>
 
 <button id="abtn" aria-label="Toggle sound">
@@ -215,6 +286,221 @@ body.dd .intro-title,body.dd .room-title{animation:dpulse 3.5s ease-in-out infin
 </section>
 
 <script>
+// ── SFX ENGINE (Web Audio API, zero external files) ─────
+const SFX = (function(){
+  let ctx = null;
+  function getCtx(){
+    if(!ctx) ctx = new(window.AudioContext||window.webkitAudioContext)();
+    if(ctx.state==='suspended') ctx.resume();
+    return ctx;
+  }
+
+  // ─ util: connect chain and auto-stop ─
+  function chain(nodes, dest){
+    nodes.reduce((a,b)=>{a.connect(b);return b;}).connect(dest||getCtx().destination);
+  }
+  function autoStop(node, when){ setTimeout(()=>{ try{node.stop()}catch(e){} }, when*1000); }
+
+  return {
+    // ── Crystal shatter: layered high-freq sine burst + glass noise ──
+    crystal(){
+      const c=getCtx(), now=c.currentTime;
+      const master=c.createGain(); master.gain.setValueAtTime(.32,now); master.connect(c.destination);
+
+      // Fundamental crack
+      const osc=c.createOscillator(); const og=c.createGain();
+      osc.type='sine'; osc.frequency.setValueAtTime(1800,now);
+      osc.frequency.exponentialRampToValueAtTime(200,now+.18);
+      og.gain.setValueAtTime(.8,now); og.gain.exponentialRampToValueAtTime(.001,now+.2);
+      chain([osc,og],master); osc.start(now); autoStop(osc,.25);
+
+      // High shimmer shards (3 detuned tones)
+      [2400,3200,4100].forEach((f,i)=>{
+        const o=c.createOscillator(),g=c.createGain();
+        o.type='sine'; o.frequency.setValueAtTime(f,now+i*.02);
+        o.frequency.exponentialRampToValueAtTime(f*.4,now+.35);
+        g.gain.setValueAtTime(.18,now+i*.02); g.gain.exponentialRampToValueAtTime(.001,now+.35);
+        chain([o,g],master); o.start(now+i*.02); autoStop(o,.4);
+      });
+
+      // Noise burst (glass scatter)
+      const buf=c.createBuffer(1,c.sampleRate*.12,c.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/d.length*8);
+      const ns=c.createBufferSource(), ng=c.createGain();
+      const hpf=c.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=3000;
+      ns.buffer=buf; ng.gain.setValueAtTime(.5,now); ng.gain.exponentialRampToValueAtTime(.001,now+.14);
+      chain([ns,hpf,ng],master); ns.start(now);
+    },
+
+    // ── Crystal reform: soft ascending chime ──
+    crystalReform(){
+      const c=getCtx(), now=c.currentTime;
+      [1200,1800,2400].forEach((f,i)=>{
+        const o=c.createOscillator(),g=c.createGain();
+        o.type='sine'; o.frequency.setValueAtTime(f,now+i*.08);
+        g.gain.setValueAtTime(0,now+i*.08);
+        g.gain.linearRampToValueAtTime(.12,now+i*.08+.05);
+        g.gain.exponentialRampToValueAtTime(.001,now+i*.08+.5);
+        chain([o,g]); o.start(now+i*.08); autoStop(o,now+i*.08+.6);
+      });
+    },
+
+    // ── Clock drag start: ratchet click ──
+    clockGrab(){
+      const c=getCtx(), now=c.currentTime;
+      const o=c.createOscillator(),g=c.createGain();
+      o.type='square'; o.frequency.setValueAtTime(160,now);
+      o.frequency.exponentialRampToValueAtTime(80,now+.04);
+      g.gain.setValueAtTime(.25,now); g.gain.exponentialRampToValueAtTime(.001,now+.06);
+      chain([o,g]); o.start(now); autoStop(o,.08);
+    },
+
+    // ── Clock tick while dragging (called sparsely) ──
+    clockTick(){
+      const c=getCtx(), now=c.currentTime;
+      const buf=c.createBuffer(1,c.sampleRate*.025,c.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/d.length*30);
+      const ns=c.createBufferSource(),g=c.createGain();
+      const bpf=c.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=900; bpf.Q.value=2;
+      ns.buffer=buf; g.gain.setValueAtTime(.18,now);
+      chain([ns,bpf,g]); ns.start(now);
+    },
+
+    // ── Clock release: soft thud ──
+    clockRelease(){
+      const c=getCtx(), now=c.currentTime;
+      const o=c.createOscillator(),g=c.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(90,now);
+      o.frequency.exponentialRampToValueAtTime(40,now+.12);
+      g.gain.setValueAtTime(.22,now); g.gain.exponentialRampToValueAtTime(.001,now+.18);
+      chain([o,g]); o.start(now); autoStop(o,.2);
+    },
+
+    // ── Lantern wake: bell shimmer ascending ──
+    lanternWake(col){
+      const c=getCtx(), now=c.currentTime;
+      const master=c.createGain(); master.gain.setValueAtTime(.4,now); master.connect(c.destination);
+
+      // Bell tones ascending
+      [660,880,1100,1320].forEach((f,i)=>{
+        const o=c.createOscillator(),g=c.createGain();
+        o.type='sine'; o.frequency.setValueAtTime(f,now+i*.07);
+        g.gain.setValueAtTime(0,now+i*.07);
+        g.gain.linearRampToValueAtTime(.22-i*.04,now+i*.07+.04);
+        g.gain.exponentialRampToValueAtTime(.001,now+i*.07+.8);
+        chain([o,g],master); o.start(now+i*.07); autoStop(o,now+i*.07+.9);
+      });
+
+      // Sparkle shimmer (random high partials)
+      for(let i=0;i<5;i++){
+        const f=2000+Math.random()*2000;
+        const o=c.createOscillator(),g=c.createGain();
+        o.type='sine'; o.frequency.value=f;
+        const delay=Math.random()*.2;
+        g.gain.setValueAtTime(0,now+delay);
+        g.gain.linearRampToValueAtTime(.06,now+delay+.03);
+        g.gain.exponentialRampToValueAtTime(.001,now+delay+.4);
+        chain([o,g],master); o.start(now+delay); autoStop(o,now+delay+.5);
+      }
+    },
+
+    // ── TV channel change: static crackle + click ──
+    tvChannel(){
+      const c=getCtx(), now=c.currentTime;
+
+      // Static burst
+      const buf=c.createBuffer(1,c.sampleRate*.08,c.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/d.length*6);
+      const ns=c.createBufferSource(),ng=c.createGain();
+      const bpf=c.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=2200; bpf.Q.value=.5;
+      ns.buffer=buf; ng.gain.setValueAtTime(.35,now); ng.gain.exponentialRampToValueAtTime(.001,now+.1);
+      chain([ns,bpf,ng]); ns.start(now);
+
+      // Mechanical click
+      const o=c.createOscillator(),g=c.createGain();
+      o.type='square'; o.frequency.setValueAtTime(220,now);
+      o.frequency.exponentialRampToValueAtTime(55,now+.05);
+      g.gain.setValueAtTime(.28,now); g.gain.exponentialRampToValueAtTime(.001,now+.07);
+      chain([o,g]); o.start(now); autoStop(o,.09);
+    },
+
+    // ── TV power ON: CRT warm-up hum ──
+    tvPowerOn(){
+      const c=getCtx(), now=c.currentTime;
+      const master=c.createGain(); master.gain.setValueAtTime(.3,now); master.connect(c.destination);
+
+      // CRT thump
+      const o=c.createOscillator(),g=c.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(60,now);
+      o.frequency.exponentialRampToValueAtTime(30,now+.25);
+      g.gain.setValueAtTime(.7,now); g.gain.exponentialRampToValueAtTime(.001,now+.35);
+      chain([o,g],master); o.start(now); autoStop(o,.4);
+
+      // Electronic hiss rising
+      const buf=c.createBuffer(1,c.sampleRate*.4,c.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(i/d.length)*.8;
+      const ns=c.createBufferSource(),ng=c.createGain();
+      const hpf=c.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=1500;
+      ns.buffer=buf; ng.gain.setValueAtTime(.25,now); ng.gain.exponentialRampToValueAtTime(.001,now+.5);
+      chain([ns,hpf,ng],master); ns.start(now);
+    },
+
+    // ── TV power OFF: CRT discharge ──
+    tvPowerOff(){
+      const c=getCtx(), now=c.currentTime;
+
+      // Descending whine
+      const o=c.createOscillator(),g=c.createGain();
+      o.type='sawtooth'; o.frequency.setValueAtTime(800,now);
+      o.frequency.exponentialRampToValueAtTime(20,now+.6);
+      g.gain.setValueAtTime(.18,now); g.gain.exponentialRampToValueAtTime(.001,now+.7);
+      chain([o,g]); o.start(now); autoStop(o,.75);
+
+      // Pop
+      const o2=c.createOscillator(),g2=c.createGain();
+      o2.type='sine'; o2.frequency.setValueAtTime(120,now);
+      o2.frequency.exponentialRampToValueAtTime(20,now+.08);
+      g2.gain.setValueAtTime(.4,now); g2.gain.exponentialRampToValueAtTime(.001,now+.1);
+      chain([o2,g2]); o2.start(now); autoStop(o2,.12);
+    },
+
+    // ── Flower bloom: soft whoosh + sparkle ──
+    flowerBloom(){
+      const c=getCtx(), now=c.currentTime;
+      const master=c.createGain(); master.gain.setValueAtTime(.35,now); master.connect(c.destination);
+
+      // Whoosh (filtered noise sweep)
+      const buf=c.createBuffer(1,c.sampleRate*.5,c.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1);
+      const ns=c.createBufferSource(),ng=c.createGain();
+      const bpf=c.createBiquadFilter(); bpf.type='bandpass';
+      bpf.frequency.setValueAtTime(200,now);
+      bpf.frequency.exponentialRampToValueAtTime(1800,now+.35);
+      bpf.Q.value=1.2;
+      ns.buffer=buf;
+      ng.gain.setValueAtTime(0,now);
+      ng.gain.linearRampToValueAtTime(.5,now+.1);
+      ng.gain.exponentialRampToValueAtTime(.001,now+.5);
+      chain([ns,bpf,ng],master); ns.start(now);
+
+      // Sparkle tones
+      [1760,2093,2637,3136].forEach((f,i)=>{
+        const o=c.createOscillator(),g=c.createGain();
+        o.type='sine'; o.frequency.setValueAtTime(f,now+i*.06);
+        g.gain.setValueAtTime(0,now+i*.06);
+        g.gain.linearRampToValueAtTime(.14,now+i*.06+.04);
+        g.gain.exponentialRampToValueAtTime(.001,now+i*.06+.55);
+        chain([o,g],master); o.start(now+i*.06); autoStop(o,now+i*.06+.6);
+      });
+    },
+  };
+})();
+
 // ── NAV SCROLL (pure JS, no href) ────────────────────────
 function goTo(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
 document.getElementById('nav-c').addEventListener('click',()=>goTo('s1'));
@@ -337,6 +623,7 @@ function mkRoom(id){
     if(c.userData.shattered)return;
     c.userData.shattered=true;
     c.visible=false;
+    SFX.crystal(); // 💥 shatter sound
     const shardCount=8;
     const origPos=c.position.clone();
     for(let s=0;s<shardCount;s++){
@@ -407,6 +694,7 @@ function mkRoom(id){
         c.userData.shattered=false;
         c.userData.reforming=true;
         c.userData.reformT=0;
+        SFX.crystalReform(); // ✨ reform chime
       }
     }
     if(c.userData.reforming){
@@ -481,9 +769,11 @@ function mkRoom(id){
       draggedClock.userData.dragging=true;
       lastAngle=angleFromCenter(draggedClock,cx,cy,rect);
       cv2.style.cursor='grabbing';
+      SFX.clockGrab(); // 🕰️ grab click
       e.preventDefault();
     }
   }
+  let lastTickAngle=0,tickThreshold=.15;
   function moveDrag(e){
     if(!draggedClock)return;
     const{cx,cy,rect}=getMouseNDC(e);
@@ -493,10 +783,13 @@ function mkRoom(id){
     if(delta<-Math.PI)delta+=Math.PI*2;
     draggedClock.userData.userSpin+=delta;
     lastAngle=ang;
+    // tick sound every ~15° of rotation
+    lastTickAngle+=Math.abs(delta);
+    if(lastTickAngle>tickThreshold){lastTickAngle=0;SFX.clockTick();}
     e.preventDefault();
   }
   function endDrag(){
-    if(draggedClock)draggedClock.userData.dragging=false;
+    if(draggedClock){draggedClock.userData.dragging=false;SFX.clockRelease();} // 🕰️ release thud
     draggedClock=null;cv2.style.cursor='';
   }
   cv2.addEventListener('mousedown',startDrag);
@@ -649,6 +942,7 @@ function mkRoom(id){
 
   function wakeLantern(ln){
     ln.awake=true;ln.awakeT=0;
+    SFX.lanternWake(ln.col); // 🔔 bell shimmer
     // Light wave ring burst
     const ringGeo=new THREE.RingGeometry(.05,.08,24);
     const ringMat=new THREE.MeshBasicMaterial({color:ln.col,transparent:true,opacity:.7,side:THREE.DoubleSide});
@@ -1090,9 +1384,11 @@ function mkRoom(id){
       const ch=found.btn.userData.channel;
       if(ch===-1){
         powerOn=!powerOn;
+        if(powerOn) SFX.tvPowerOn(); else SFX.tvPowerOff(); // 📺 CRT sound
       }else{
         currentChannel=ch;
         powerOn=true;
+        SFX.tvChannel(); // 📺 static crackle
       }
       channelChangeFlash=8;
       found.btn.userData.pressT=1;
@@ -1214,6 +1510,7 @@ function mkRoom(id){
     if(fl.userData.bursting)return;
     fl.userData.bursting=true;
     fl.userData.burstT=0;
+    SFX.flowerBloom(); // 🌸 whoosh + sparkle
 
     // Pollen particle burst at flower's world position
     const worldPos=new THREE.Vector3();
@@ -1316,65 +1613,138 @@ function mkRoom(id){
 
 // ── GSAP SCROLL ──────────────────────────────────────────
 gsap.registerPlugin(ScrollTrigger);
+
+// NAV + PROG fade in
 gsap.to('#mnav',{opacity:1,duration:1.2,delay:2.8});
 gsap.to('#prog',{opacity:1,duration:1,delay:3});
-const itl=gsap.timeline({delay:.5});
-itl.to('.eyebrow',{opacity:1,y:0,duration:1.1,ease:'power3.out'},'.3')
-   .to('.intro-title',{opacity:1,y:0,duration:1.5,ease:'power3.out'},'.7')
-   .to('.intro-sub',{opacity:1,y:0,duration:1.2,ease:'power3.out'},'1.2')
-   .to('.scroll-cue',{opacity:1,duration:.9},'1.8');
 
-gsap.set('.room-label,.room-title,.room-body,.rcanvas-wrap,.room-hint',{opacity:0,y:28});
+// ── INTRO: letter-spacing animates from wide → tight, glow fires, eyebrow etc.
+const itl=gsap.timeline({delay:.6});
+itl
+  .to('.eyebrow',{opacity:1,y:0,duration:1,ease:'power3.out'},'.3')
+  .fromTo('.intro-title',
+    {opacity:0,y:40,letterSpacing:'0.4em'},
+    {opacity:1,y:0,letterSpacing:'-0.02em',duration:1.8,ease:'expo.out'},
+    '.6')
+  .to('.intro-title',{duration:.1,onComplete:()=>document.querySelector('.intro-title').classList.add('lit')},1.5)
+  .to('.intro-sub',{opacity:1,y:0,duration:1.2,ease:'power3.out'},'1.3')
+  .to('.scroll-cue',{opacity:1,duration:.9},'2');
+
+// ── SET initial states ─
+gsap.set('.room-label',{opacity:0,y:20});
+gsap.set('.room-title',{opacity:0,y:36,letterSpacing:'0.2em'});
+gsap.set('.room-body,.room-hint',{opacity:0,y:22});
+gsap.set('.rcanvas-wrap',{opacity:0,y:44,scale:.97});
 gsap.set('.out-label,.out-title,.out-sub,.out-btn',{opacity:0,y:18});
+gsap.set('.snum',{opacity:0,x:14});
 
+// ── ROOM REVEALS: dramatic stagger + canvas scrub scale ─
 [{c:'rc',s:'s1'},{c:'rk',s:'s2'},{c:'rg',s:'s3'},{c:'rm',s:'s4'},{c:'rv',s:'s5'},{c:'rb',s:'s6'}].forEach(({c,s})=>{
-  gsap.timeline({scrollTrigger:{trigger:'#'+s,start:'top 70%',toggleActions:'play none none reverse'}})
-    .to('.'+c+' .room-label',{opacity:1,y:0,duration:.75,ease:'power2.out'})
-    .to('.'+c+' .room-title',{opacity:1,y:0,duration:1,ease:'power2.out'},'-=.4')
-    .to('.'+c+' .rcanvas-wrap',{opacity:1,y:0,duration:1.2,ease:'power2.out'},'-=.6')
-    .to('.'+c+' .room-body',{opacity:1,y:0,duration:.9,ease:'power2.out'},'-=.5')
-    .to('.'+c+' .room-hint',{opacity:1,y:0,duration:.7,ease:'power2.out'},'-=.4');
+  const trig={trigger:'#'+s,start:'top 72%',toggleActions:'play none none reverse'};
+  gsap.timeline({scrollTrigger:trig})
+    .to('.'+c+' .room-label',{opacity:1,y:0,duration:.6,ease:'power2.out'})
+    .fromTo('.'+c+' .room-title',
+      {opacity:0,y:36,letterSpacing:'0.18em'},
+      {opacity:1,y:0,letterSpacing:'-0.01em',duration:1.1,ease:'expo.out'},'-=.35')
+    .to('.'+c+' .rcanvas-wrap',{opacity:1,y:0,scale:1,duration:1.3,ease:'power3.out'},'-=.7')
+    .to('.'+c+' .room-body',{opacity:1,y:0,duration:.85,ease:'power2.out'},'-=.55')
+    .to('.'+c+' .room-hint',{opacity:1,y:0,duration:.6,ease:'power2.out'},'-=.4');
+
+  // Parallax scrub on canvas — moves up slightly as section exits
+  gsap.to('.'+c+' .rcanvas-wrap',{
+    y:-30,ease:'none',
+    scrollTrigger:{trigger:'#'+s,start:'top top',end:'bottom top',scrub:1.5}
+  });
+
+  // section num slide in
+  gsap.to('#'+s+' .snum',{opacity:1,x:0,duration:.8,ease:'power2.out',
+    scrollTrigger:{trigger:'#'+s,start:'top 60%'}
+  });
 });
+
+// ── OUTRO ─
 gsap.timeline({scrollTrigger:{trigger:'#outro',start:'top 65%'}})
   .to('.out-label',{opacity:1,y:0,duration:.7,ease:'power2.out'})
-  .to('.out-title',{opacity:1,y:0,duration:1.1,ease:'power2.out'},'-=.3')
-  .to('.out-sub',{opacity:1,y:0,duration:.9,ease:'power2.out'},'-=.5')
-  .to('.out-btn',{opacity:1,y:0,duration:.7,ease:'power2.out'},'-=.3');
+  .fromTo('.out-title',{opacity:0,y:30,letterSpacing:'0.15em'},{opacity:1,y:0,letterSpacing:'-.01em',duration:1.2,ease:'expo.out'},'-=.3')
+  .to('.out-sub',{opacity:1,y:0,duration:.9,ease:'power2.out'},'-=.6')
+  .to('.out-btn',{opacity:1,y:0,duration:.7,ease:'power2.out'},'-=.4');
 
-// Dividers
-gsap.utils.toArray('.divr').forEach(d=>{
-  gsap.from(d.querySelectorAll('.dline'),{scaleX:0,duration:1.1,ease:'power2.out',stagger:.1,scrollTrigger:{trigger:d,start:'top 90%'}});
-  gsap.from(d.querySelector('.dglyph'),{opacity:0,scale:.4,duration:.7,delay:.25,ease:'back.out(2)',scrollTrigger:{trigger:d,start:'top 90%'}});
+// ── DRAMATIC DIVIDERS: scale from center + glow flare ─
+gsap.utils.toArray('.divr').forEach(div=>{
+  ScrollTrigger.create({
+    trigger:div,start:'top 90%',once:true,
+    onEnter:()=>{
+      const lines=div.querySelectorAll('.dline');
+      const glyph=div.querySelector('.dglyph');
+      // lines expand from center
+      gsap.fromTo(lines,
+        {scaleX:0},
+        {scaleX:1,duration:1.2,ease:'power3.out',stagger:.08,
+          onComplete:()=>div.classList.add('fired')} // triggers CSS flare animation
+      );
+      gsap.fromTo(glyph,{opacity:0,scale:.2,rotation:-45},{opacity:.8,scale:1,rotation:0,duration:.7,delay:.35,ease:'back.out(3)'});
+    }
+  });
 });
 
-// ── PROGRESS DOTS ─────────────────────────────────────────
+// ── AMBIENT BACKGROUND COLOR SHIFT PER SECTION ─
+const ambEl=document.getElementById('amb');
+const ambColors={
+  '0':'rgba(4,4,11,0)',                        // intro — void
+  '1':'rgba(8,16,36,0.22)',                    // crystal — deep blue
+  '2':'rgba(30,16,6,0.22)',                    // clocks — warm amber
+  '3':'rgba(6,22,10,0.22)',                    // garden — forest green
+  '4':'rgba(8,6,24,0.22)',                     // mirror — violet deep
+  '5':'rgba(6,14,20,0.22)',                    // tv — cold blue-grey
+  '6':'rgba(20,6,14,0.22)',                    // bloom — rose
+  '7':'rgba(4,4,11,0)',                        // outro — void
+};
+const vigInts={'0':'.82','1':'.88','2':'.88','3':'.85','4':'.92','5':'.88','6':'.86','7':'.78'};
+
+// ── PROGRESS DOTS + section flash ─
 const allSecs=document.querySelectorAll('[data-s]');
 const dots=document.querySelectorAll('.pdot');
+const flash=document.getElementById('flash');
+let lastS='0';
+
 allSecs.forEach(s=>{
   new IntersectionObserver(entries=>{
     entries.forEach(e=>{
       if(e.isIntersecting){
+        const idx=e.target.dataset.s;
         dots.forEach(d=>d.classList.remove('on'));
-        const d=document.querySelector('.pdot[data-s="'+e.target.dataset.s+'"]');
+        const d=document.querySelector('.pdot[data-s="'+idx+'"]');
         if(d)d.classList.add('on');
+
+        // ambient color shift
+        ambEl.style.background=ambColors[idx]||'rgba(4,4,11,0)';
+
+        // section flash (subtle white pulse on new section enter)
+        if(idx!==lastS){
+          gsap.fromTo(flash,{opacity:.08},{opacity:0,duration:.9,ease:'power2.out'});
+          lastS=idx;
+        }
       }
     });
-  },{threshold:.4}).observe(s);
+  },{threshold:.38}).observe(s);
 });
 dots.forEach(d=>{
   const map={'0':'s0','1':'s1','2':'s2','3':'s3','4':'s4','5':'s5','6':'s6','7':'outro'};
   d.addEventListener('click',()=>{const el=document.getElementById(map[d.dataset.s]);if(el)el.scrollIntoView({behavior:'smooth'})});
 });
 
-// ── MOUSE PARALLAX ───────────────────────────────────────
-let pmx=0,pmy=0;
-document.addEventListener('mousemove',e=>{pmx=(e.clientX/innerWidth-.5);pmy=(e.clientY/innerHeight-.5)});
+// ── MOUSE PARALLAX (deeper, per-element depth) ───────────
+let pmx=0,pmy=0,tpmx=0,tpmy=0;
+document.addEventListener('mousemove',e=>{tpmx=(e.clientX/innerWidth-.5);tpmy=(e.clientY/innerHeight-.5)});
 (function rf(){
   requestAnimationFrame(rf);
-  document.querySelectorAll('.intro-title').forEach(el=>el.style.transform=`translate(${pmx*20}px,${pmy*12}px)`);
-  document.querySelectorAll('.intro-sub').forEach(el=>el.style.transform=`translate(${pmx*9}px,${pmy*5}px)`);
-  document.querySelectorAll('.room-title').forEach(el=>el.style.transform=`translate(${pmx*14}px,${pmy*8}px)`);
-  document.querySelectorAll('.room-body').forEach(el=>el.style.transform=`translate(${pmx*6}px,${pmy*3}px)`);
+  pmx+=(tpmx-pmx)*.06; pmy+=(tpmy-pmy)*.06; // smooth lerp
+  document.querySelectorAll('.intro-title').forEach(el=>el.style.transform=`translate(${pmx*22}px,${pmy*13}px)`);
+  document.querySelectorAll('.intro-sub').forEach(el=>el.style.transform=`translate(${pmx*10}px,${pmy*6}px)`);
+  document.querySelectorAll('.eyebrow').forEach(el=>el.style.transform=`translate(${pmx*5}px,${pmy*3}px)`);
+  document.querySelectorAll('.room-title').forEach(el=>el.style.transform=`translate(${pmx*15}px,${pmy*9}px)`);
+  document.querySelectorAll('.room-body').forEach(el=>el.style.transform=`translate(${pmx*7}px,${pmy*4}px)`);
+  document.querySelectorAll('.room-label').forEach(el=>el.style.transform=`translate(${pmx*4}px,${pmy*2}px)`);
 })();
 
 // ── DEEP DREAM ───────────────────────────────────────────
